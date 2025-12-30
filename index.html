@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizador Pro - Corte de Triplay</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --accent: #f59e0b;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 1100px; margin: auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        .card { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        input { padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: 0.2s; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+        th { background: var(--secondary); color: white; padding: 12px; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; }
+
+        .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: #10b981; color: white; margin-top: 10px; }
+        .btn-calc { background: var(--primary); color: white; width: 100%; font-size: 1.2em; margin-top: 20px; }
+        .btn-del { background: #ef4444; color: white; padding: 5px 10px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        #results { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 30px; }
+        .sheet-container { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        canvas { border: 2px solid #334155; border-radius: 4px; background: #fff; max-width: 100%; height: auto; }
+        .sheet-label { font-weight: bold; margin-bottom: 10px; display: block; color: var(--primary); }
+        .stats { background: #e0f2fe; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🪚 Optimizador de Corte Maestro</h1>
+        <p>Distribución automática en múltiples hojas de 122 x 244 cm</p>
+    </header>
+
+    <div class="card">
+        <div class="controls">
+            <div class="input-group">
+                <label>Grosor del disco / Kerf (cm)</label>
+                <input type="number" id="kerf" value="0.3" step="0.1">
+            </div>
+        </div>
+
+        <table id="piecesTable">
+            <thead>
+                <tr>
+                    <th>Nombre / Color</th>
+                    <th>Ancho (cm)</th>
+                    <th>Largo (cm)</th>
+                    <th>Cantidad</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" placeholder="Ej: Lateral" style="width:80px"></td>
+                    <td><input type="number" class="w" value="60"></td>
+                    <td><input type="number" class="l" value="100"></td>
+                    <td><input type="number" class="q" value="4"></td>
+                    <td><button class="btn btn-del" onclick="removeRow(this)">✕</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-add" onclick="addRow()">+ Agregar otra medida</button>
+        <button class="btn btn-calc" onclick="generateLayout()">CALCULAR DISTRIBUCIÓN</button>
+    </div>
+
+    <div id="results"></div>
+</div>
+
+<script>
+    function addRow() {
+        const tbody = document.querySelector("#piecesTable tbody");
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><input type="text" placeholder="Pieza" style="width:80px"></td>
+            <td><input type="number" class="w"></td>
+            <td><input type="number" class="l"></td>
+            <td><input type="number" class="q"></td>
+            <td><button class="btn btn-del" onclick="removeRow(this)">✕</button></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    function removeRow(btn) { btn.parentElement.parentElement.remove(); }
+
+    function getRandomColor() {
+        const colors = ['#f87171', '#fb923c', '#fbbf24', '#4ade80', '#2dd4bf', '#38bdf8', '#818cf8', '#c084fc', '#fb7185'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function generateLayout() {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = ""; // Limpiar resultados anteriores
+        
+        const kerf = parseFloat(document.getElementById("kerf").value) || 0;
+        const SHEET_W = 122;
+        const SHEET_L = 244;
+        const SCALE = 2; // Escala visual
+
+        let allPieces = [];
+        document.querySelectorAll("#piecesTable tbody tr").forEach(row => {
+            const w = parseFloat(row.querySelector(".w").value);
+            const l = parseFloat(row.querySelector(".l").value);
+            const q = parseInt(row.querySelector(".q").value);
+            const color = getRandomColor();
+            if(w && l && q) {
+                for(let i=0; i<q; i++) {
+                    // Normalizar: ancho siempre es la medida menor para intentar acomodar mejor
+                    let pw = Math.min(w, l);
+                    let pl = Math.max(w, l);
+                    allPieces.push({w: pw, l: pl, color: color});
+                }
+            }
+        });
+
+        // Ordenar piezas de mayor a menor superficie
+        allPieces.sort((a, b) => (b.w * b.l) - (a.w * a.l));
+
+        let sheets = [];
+
+        // Algoritmo de empaquetado
+        while (allPieces.length > 0) {
+            let currentSheet = { pieces: [], usedArea: 0 };
+            let spaces = [{ x: 0, y: 0, w: SHEET_W, l: SHEET_L }];
+
+            for (let i = 0; i < allPieces.length; i++) {
+                let p = allPieces[i];
+                let fitFound = false;
+
+                for (let j = 0; j < spaces.length; j++) {
+                    let s = spaces[j];
+                    
+                    // Intentar normal y rotado
+                    let modes = [{w: p.w, l: p.l}, {w: p.l, l: p.w}];
+                    
+                    for (let mode of modes) {
+                        if (mode.w <= s.w && mode.l <= s.l) {
+                            // ¡Cabe! Guardar pieza
+                            currentSheet.pieces.push({
+                                x: s.x, y: s.y, w: mode.w, l: mode.l, color: p.color
+                            });
+                            currentSheet.usedArea += (mode.w * mode.l);
+
+                            // Dividir el espacio restante (Algoritmo Guillotina simple)
+                            let remainingW = s.w - mode.w - kerf;
+                            let remainingL = s.l - mode.l - kerf;
+
+                            // Generar nuevos espacios
+                            if (remainingW > 0) spaces.push({ x: s.x + mode.w + kerf, y: s.y, w: remainingW, l: mode.l });
+                            if (remainingL > 0) spaces.push({ x: s.x, y: s.y + mode.l + kerf, w: s.w, l: remainingL });
+
+                            spaces.splice(j, 1);
+                            allPieces.splice(i, 1);
+                            i--; 
+                            fitFound = true;
+                            break;
+                        }
+                    }
+                    if (fitFound) break;
+                }
+            }
+            sheets.push(currentSheet);
+        }
+
+        // Dibujar cada hoja
+        sheets.forEach((sheet, index) => {
+            const container = document.createElement("div");
+            container.className = "sheet-container";
+            
+            const label = document.createElement("span");
+            label.className = "sheet-label";
+            label.innerText = `HOJA #${index + 1}`;
+            
+            const canvas = document.createElement("canvas");
+            canvas.width = SHEET_W * SCALE;
+            canvas.height = SHEET_L * SCALE;
+            const ctx = canvas.getContext("2d");
+
+            // Fondo madera
+            ctx.fillStyle = "#fef3c7";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            sheet.pieces.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 1;
+                ctx.fillRect(p.x * SCALE, p.y * SCALE, p.w * SCALE, p.l * SCALE);
+                ctx.strokeRect(p.x * SCALE, p.y * SCALE, p.w * SCALE, p.l * SCALE);
+                
+                // Medidas en texto
+                ctx.fillStyle = "#000";
+                ctx.font = "bold 9px Arial";
+                if(p.w > 15) ctx.fillText(`${p.w}x${p.l}`, (p.x + 2)*SCALE, (p.y + 10)*SCALE);
+            });
+
+            const stats = document.createElement("div");
+            stats.className = "stats";
+            const eff = ((sheet.usedArea / (SHEET_W * SHEET_L)) * 100).toFixed(1);
+            stats.innerText = `Uso: ${eff}% | Piezas: ${sheet.pieces.length}`;
+
+            container.appendChild(label);
+            container.appendChild(canvas);
+            container.appendChild(stats);
+            resultsDiv.appendChild(container);
+        });
+    }
+</script>
+
+</body>
+</html>
