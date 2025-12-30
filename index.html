@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📏 Optimizador de Cortes</title>
+    <title>📏 Optimizador de Cortes Inteligente</title>
     <style>
         :root { --p: #2563eb; --s: #10b981; --bg: #f8fafc; }
         body { font-family: system-ui, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .piece-entry { background: #ffffff; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-left: 6px solid var(--p); }
         .btn { border: none; border-radius: 8px; padding: 15px; color: white; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
         .btn-add { background: var(--s); }
@@ -17,32 +17,45 @@
         .sheet-wrapper { background: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
         canvas { background: #fff; display: block; margin: 10px auto; max-width: 100%; height: auto; border: 1px solid #334155; }
         .stats { font-weight: bold; color: #1e40af; background: #dbeafe; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+        .controls { display: flex; gap: 10px; margin: 15px 0; }
+        .control-item { flex: 1; }
+        .algorithm-select { background: #f1f5f9; border: 2px solid #cbd5e1; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2 style="text-align:center; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 15px; color: #1e293b; font-family: 'Segoe UI', system-ui, sans-serif;">
-    <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));">
-        <path d="M20 40L60 15V22L57 20L54 23L51 21L48 24L45 22L42 25L39 23L36 26L33 24L30 27L27 25L24 28L21 26L20 27V40Z" fill="#cbd5e1" stroke="#475569" stroke-width="1.2"/>
-        <path d="M20 15L60 15V18L20 22V15Z" fill="#f8fafc" fill-opacity="0.6"/> <path d="M22 35L14 28C12 26 8 26 6 28C4 30 4 34 6 36L12 42C14 44 18 44 22 42L25 38L22 35Z" fill="#7c2d12" stroke="#451a03" stroke-width="1.5"/>
-        <path d="M24 38C24 38 20 48 12 48C8 48 4 45 4 40C4 35 8 32 12 32H20L24 38Z" fill="#b45309" stroke="#451a03" stroke-width="1.5"/>
+            <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));">
+                <path d="M20 40L60 15V22L57 20L54 23L51 21L48 24L45 22L42 25L39 23L36 26L33 24L30 27L27 25L24 28L21 26L20 27V40Z" fill="#cbd5e1" stroke="#475569" stroke-width="1.2"/>
+                <path d="M20 15L60 15V18L20 22V15Z" fill="#f8fafc" fill-opacity="0.6"/> 
+                <path d="M22 35L14 28C12 26 8 26 6 28C4 30 4 34 6 36L12 42C14 44 18 44 22 42L25 38L22 35Z" fill="#7c2d12" stroke="#451a03" stroke-width="1.5"/>
+                <path d="M24 38C24 38 20 48 12 48C8 48 4 45 4 40C4 35 8 32 12 32H20L24 38Z" fill="#b45309" stroke="#451a03" stroke-width="1.5"/>
+                <ellipse cx="10" cy="40" rx="3" ry="5" transform="rotate(-30 10 40)" fill="#f1f5f9" stroke="#451a03" stroke-width="1"/>
+                <circle cx="18" cy="38" r="1.8" fill="#fbbf24" stroke="#92400e" stroke-width="0.5"/>
+                <circle cx="15" cy="42" r="1.2" fill="#d97706" stroke="#92400e" stroke-width="0.5"/>
+                <path d="M20 32V42" stroke="#451a03" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 5px; color: #64748b; margin-bottom: -6px; font-weight: 600;">Optimizador</span>
+                <span style="font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.05));">MOJARRÍN</span>
+            </div>
+        </h2>
         
-        <ellipse cx="10" cy="40" rx="3" ry="5" transform="rotate(-30 10 40)" fill="#f1f5f9" stroke="#451a03" stroke-width="1"/>
-        
-        <circle cx="18" cy="38" r="1.8" fill="#fbbf24" stroke="#92400e" stroke-width="0.5"/>
-        <circle cx="15" cy="42" r="1.2" fill="#d97706" stroke="#92400e" stroke-width="0.5"/>
-        
-        <path d="M20 32V42" stroke="#451a03" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-
-    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 5px; color: #64748b; margin-bottom: -6px; font-weight: 600;">Optimizador</span>
-        <span style="font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.05));">MOJARRÍN</span>
-    </div>
-</h2>
-        <label>Grosor de sierra (cm)</label>
-        <input type="number" id="kerf" value="0.3" step="0.1" inputmode="decimal">
+        <div class="controls">
+            <div class="control-item">
+                <label>Grosor sierra (cm)</label>
+                <input type="number" id="kerf" value="0.3" step="0.1" min="0">
+            </div>
+            <div class="control-item">
+                <label>Algoritmo</label>
+                <select id="algorithm" class="algorithm-select">
+                    <option value="maxrect">MaxRects (mejor uso)</option>
+                    <option value="ffdh">FFDH con Rotación</option>
+                    <option value="simple">Simple (rápido)</option>                    
+                </select>
+            </div>
+        </div>
         
         <div id="piecesList" style="margin-top: 15px;">
             <div class="piece-entry">
@@ -52,12 +65,15 @@
                     <div style="flex:1"><label>Largo</label><input type="number" class="l" value=""></div>
                     <div style="flex:1"><label>Cant.</label><input type="number" class="q" value=""></div>
                 </div>
+                <label style="display:block; margin-top:8px;">
+                    <input type="checkbox" class="allow-rotate" checked> Permitir rotación
+                </label>
                 <button class="btn-del" onclick="this.parentElement.remove()">✕ Quitar</button>
             </div>
         </div>
 
         <button class="btn btn-add" onclick="addRow()">+ Añadir Medida</button>
-        <button class="btn btn-calc" onclick="generate()">OPTIMIZAR AHORA</button>
+        <button class="btn btn-calc" onclick="optimize()">OPTIMIZAR AHORA</button>
     </div>
 
     <div id="results"></div>
@@ -66,115 +82,416 @@
     function addRow() {
         const div = document.createElement("div");
         div.className = "piece-entry";
-        div.innerHTML = `<input type="text" placeholder="Nombre" style="margin-bottom:8px"><div style="display:flex; gap:8px;"><div style="flex:1"><input type="number" class="w"></div><div style="flex:1"><input type="number" class="l"></div><div style="flex:1"><input type="number" class="q"></div></div><button class="btn-del" onclick="this.parentElement.remove()">✕ Quitar</button>`;
+        div.innerHTML = `
+            <input type="text" placeholder="Nombre" style="margin-bottom:8px">
+            <div style="display:flex; gap:8px;">
+                <div style="flex:1"><input type="number" class="w" value=""></div>
+                <div style="flex:1"><input type="number" class="l" value=""></div>
+                <div style="flex:1"><input type="number" class="q" value=""></div>
+            </div>
+            <label style="display:block; margin-top:8px;">
+                <input type="checkbox" class="allow-rotate" checked> Permitir rotación
+            </label>
+            <button class="btn-del" onclick="this.parentElement.remove()">✕ Quitar</button>
+        `;
         document.getElementById("piecesList").appendChild(div);
     }
 
-    function generate() {
-        const res = document.getElementById("results");
-        res.innerHTML = "";
+    function optimize() {
+        const algorithm = document.getElementById("algorithm").value;
         const kerf = parseFloat(document.getElementById("kerf").value) || 0;
         const SW = 122, SL = 244;
-        const SCALE = (window.innerWidth - 50) / SW;
-
-        let piecesToPlace = [];
+        const SCALE = Math.min((window.innerWidth - 50) / SW, 2.5);
+        
+        let pieces = [];
         document.querySelectorAll(".piece-entry").forEach(el => {
-            const w = parseFloat(el.querySelector(".w").value), l = parseFloat(el.querySelector(".l").value), q = parseInt(el.querySelector(".q").value);
+            const w = parseFloat(el.querySelector(".w").value);
+            const l = parseFloat(el.querySelector(".l").value);
+            const q = parseInt(el.querySelector(".q").value);
+            const allowRotate = el.querySelector(".allow-rotate").checked;
+            const name = el.querySelector("input[type='text']").value || `P${pieces.length+1}`;
+            
             if(w && l && q) {
-                const color = `hsl(${Math.random()*360}, 65%, 75%)`;
-                for(let i=0; i<q; i++) piecesToPlace.push({ w, l, color });
-            }
-        });
-
-        // 1. ORDENAMIENTO CRÍTICO: Por el lado más largo primero
-        piecesToPlace.sort((a,b) => Math.max(b.w, b.l) - Math.max(a.w, a.l));
-
-        let sheetNum = 1;
-        while(piecesToPlace.length > 0) {
-            let placed = [];
-            let freeRects = [{ x: 0, y: 0, w: SW, l: SL }];
-
-            for (let i = 0; i < piecesToPlace.length; i++) {
-                let p = piecesToPlace[i];
-                let bestFit = null;
-                let bestScore = Infinity;
-
-                // 2. BUSCAR EN TODOS LOS ESPACIOS DISPONIBLES
-                for (let j = 0; j < freeRects.length; j++) {
-                    let fr = freeRects[j];
-                    
-                    // Probar ambas orientaciones
-                    let orientations = [
-                        { w: p.w, l: p.l },
-                        { w: p.l, l: p.w }
-                    ];
-
-                    orientations.forEach(orient => {
-                        if (orient.w <= fr.w && orient.l <= fr.l) {
-                            // Puntuación por "Short Side Fit" (mejor aprovechamiento de esquinas)
-                            let score = Math.min(fr.w - orient.w, fr.l - orient.l);
-                            if (score < bestScore) {
-                                bestScore = score;
-                                bestFit = { rectIdx: j, w: orient.w, l: orient.l };
-                            }
-                        }
+                const color = `hsl(${Math.random()*360}, 70%, 80%)`;
+                for(let i=0; i<q; i++) {
+                    pieces.push({
+                        w: w,
+                        l: l,
+                        allowRotate: allowRotate,
+                        color: color,
+                        name: name + (q > 1 ? `-${i+1}` : ''),
+                        area: w * l
                     });
                 }
-
-                if (bestFit) {
-                    let fr = freeRects[bestFit.rectIdx];
-                    placed.push({ x: fr.x, y: fr.y, w: bestFit.w, l: bestFit.l, color: p.color });
-
-                    // 3. DIVIDIR EL ESPACIO (MaxRects mejorado)
-                    let newRects = [];
-                    // Espacio a la derecha
-                    if (fr.w > bestFit.w) {
-                        newRects.push({ x: fr.x + bestFit.w + kerf, y: fr.y, w: fr.w - bestFit.w - kerf, l: fr.l });
-                    }
-                    // Espacio abajo
-                    if (fr.l > bestFit.l) {
-                        newRects.push({ x: fr.x, y: fr.y + bestFit.l + kerf, w: bestFit.w, l: fr.l - bestFit.l - kerf });
-                    }
-
-                    freeRects.splice(bestFit.rectIdx, 1);
-                    freeRects.push(...newRects);
-                    
-                    // Re-ordenar espacios libres para que los más pequeños se llenen primero
-                    freeRects.sort((a, b) => (a.w * a.l) - (b.w * b.l));
-
-                    piecesToPlace.splice(i, 1);
-                    i--;
-                }
-            }
-            render(placed, sheetNum++, SCALE, SW, SL, res);
-        }
-    }
-
-    function render(pieces, num, sc, sw, sl, container) {
-        const wrap = document.createElement("div");
-        wrap.className = "sheet-wrapper";
-        let used = pieces.reduce((a, b) => a + (b.w * b.l), 0);
-        wrap.innerHTML = `<div style="display:flex;justify-content:space-between"><h3>Hoja ${num}</h3><span class="stats">Uso: ${((used/(sw*sl))*100).toFixed(1)}%</span></div>`;
-        const canvas = document.createElement("canvas");
-        canvas.width = sw * sc; canvas.height = sl * sc;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
-        pieces.forEach(p => {
-            ctx.fillStyle = p.color; ctx.fillRect(p.x*sc, p.y*sc, p.w*sc, p.l*sc);
-            ctx.strokeStyle = "#000"; ctx.strokeRect(p.x*sc, p.y*sc, p.w*sc, p.l*sc);
-            if(p.w*sc > 20) {
-                ctx.fillStyle = "#000"; ctx.font = `bold ${Math.max(10, 3.5*sc)}px sans-serif`;
-                ctx.fillText(`${p.w}x${p.l}`, (p.x+1)*sc, (p.y+5)*sc);
             }
         });
+        
+        if(pieces.length === 0) {
+            alert("Agrega al menos una pieza");
+            return;
+        }
+        
+        const res = document.getElementById("results");
+        res.innerHTML = "";
+        
+        let sheets = [];
+        let remainingPieces = [...pieces];
+        
+        switch(algorithm) {
+            case 'simple':
+                sheets = packSimple(remainingPieces, SW, SL, kerf);
+                break;
+            case 'maxrect':
+                sheets = packMaxRects(remainingPieces, SW, SL, kerf);
+                break;
+            default: // ffdh
+                sheets = packFFDH(remainingPieces, SW, SL, kerf);
+        }
+        
+        sheets.forEach((sheet, idx) => {
+            renderSheet(sheet, idx+1, SCALE, SW, SL, res);
+        });
+    }
+
+    // Algoritmo FFDH (First Fit Decreasing Height) mejorado con rotación
+    function packFFDH(pieces, SW, SL, kerf) {
+        let sheets = [];
+        let sortedPieces = [...pieces].sort((a, b) => {
+            // Ordenar por altura máxima primero, luego por área
+            const aMax = Math.max(a.w, a.l);
+            const bMax = Math.max(b.w, b.l);
+            if(bMax !== aMax) return bMax - aMax;
+            return b.area - a.area;
+        });
+        
+        while(sortedPieces.length > 0) {
+            let sheetPieces = [];
+            let shelves = []; // {y, height, remainingWidth}
+            let placedIndices = new Set();
+            
+            for(let i = 0; i < sortedPieces.length; i++) {
+                if(placedIndices.has(i)) continue;
+                
+                const piece = sortedPieces[i];
+                const orientations = piece.allowRotate ? 
+                    [[piece.w, piece.l], [piece.l, piece.w]] : 
+                    [[piece.w, piece.l]];
+                
+                let placed = false;
+                
+                // Intentar colocar en estante existente
+                for(let shelf of shelves) {
+                    if(placed) break;
+                    
+                    for(let [w, h] of orientations) {
+                        if(w <= shelf.remainingWidth && h <= shelf.height) {
+                            sheetPieces.push({
+                                x: SW - shelf.remainingWidth,
+                                y: shelf.y,
+                                w: w, l: h,
+                                color: piece.color,
+                                name: piece.name,
+                                rotated: w !== piece.w
+                            });
+                            shelf.remainingWidth -= (w + kerf);
+                            placedIndices.add(i);
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si no cupo, crear nuevo estante
+                if(!placed) {
+                    let bestOrientation = null;
+                    let bestHeight = Infinity;
+                    
+                    for(let [w, h] of orientations) {
+                        if(w <= SW && h <= SL) {
+                            // Buscar posición Y disponible
+                            let availableY = 0;
+                            for(let shelf of shelves) {
+                                availableY = Math.max(availableY, shelf.y + shelf.height + kerf);
+                            }
+                            
+                            if(availableY + h <= SL) {
+                                if(h < bestHeight) {
+                                    bestHeight = h;
+                                    bestOrientation = [w, h];
+                                }
+                            }
+                        }
+                    }
+                    
+                    if(bestOrientation) {
+                        const [w, h] = bestOrientation;
+                        let availableY = 0;
+                        for(let shelf of shelves) {
+                            availableY = Math.max(availableY, shelf.y + shelf.height + kerf);
+                        }
+                        
+                        sheetPieces.push({
+                            x: 0,
+                            y: availableY,
+                            w: w, l: h,
+                            color: piece.color,
+                            name: piece.name,
+                            rotated: w !== piece.w
+                        });
+                        
+                        shelves.push({
+                            y: availableY,
+                            height: h,
+                            remainingWidth: SW - w - kerf
+                        });
+                        placedIndices.add(i);
+                    }
+                }
+            }
+            
+            // Remover piezas colocadas
+            sortedPieces = sortedPieces.filter((_, idx) => !placedIndices.has(idx));
+            sheets.push(sheetPieces);
+        }
+        
+        return sheets;
+    }
+
+    // Algoritmo MaxRects (más eficiente pero más complejo)
+    function packMaxRects(pieces, SW, SL, kerf) {
+        let sheets = [];
+        let sortedPieces = [...pieces].sort((a, b) => b.area - a.area);
+        
+        while(sortedPieces.length > 0) {
+            let rects = [{x: 0, y: 0, w: SW, h: SL}];
+            let sheetPieces = [];
+            let placedIndices = new Set();
+            
+            for(let i = 0; i < sortedPieces.length; i++) {
+                if(placedIndices.has(i)) continue;
+                
+                const piece = sortedPieces[i];
+                const orientations = piece.allowRotate ? 
+                    [[piece.w, piece.l], [piece.l, piece.w]] : 
+                    [[piece.w, piece.l]];
+                
+                let bestRect = null;
+                let bestOrientation = null;
+                let bestScore = Infinity;
+                
+                // Buscar el mejor rectángulo disponible
+                for(let rect of rects) {
+                    for(let [w, h] of orientations) {
+                        if(w <= rect.w && h <= rect.h) {
+                            // Puntuación: preferir encajar perfectamente
+                            const score = (rect.w - w) + (rect.h - h);
+                            if(score < bestScore) {
+                                bestScore = score;
+                                bestRect = rect;
+                                bestOrientation = [w, h];
+                            }
+                        }
+                    }
+                }
+                
+                if(bestRect && bestOrientation) {
+                    const [w, h] = bestOrientation;
+                    sheetPieces.push({
+                        x: bestRect.x,
+                        y: bestRect.y,
+                        w: w, l: h,
+                        color: piece.color,
+                        name: piece.name,
+                        rotated: w !== piece.w
+                    });
+                    
+                    // Dividir el rectángulo restante
+                    rects = rects.filter(r => r !== bestRect);
+                    
+                    // Crear nuevos rectángulos del espacio sobrante
+                    if(bestRect.w - w > kerf) {
+                        rects.push({
+                            x: bestRect.x + w + kerf,
+                            y: bestRect.y,
+                            w: bestRect.w - w - kerf,
+                            h: h
+                        });
+                    }
+                    if(bestRect.h - h > kerf) {
+                        rects.push({
+                            x: bestRect.x,
+                            y: bestRect.y + h + kerf,
+                            w: bestRect.w,
+                            h: bestRect.h - h - kerf
+                        });
+                    }
+                    
+                    placedIndices.add(i);
+                }
+            }
+            
+            // Ordenar rectángulos por posición Y, luego X
+            rects.sort((a, b) => a.y - b.y || a.x - b.x);
+            
+            // Remover piezas colocadas
+            sortedPieces = sortedPieces.filter((_, idx) => !placedIndices.has(idx));
+            sheets.push(sheetPieces);
+        }
+        
+        return sheets;
+    }
+
+    // Algoritmo simple (para comparación)
+    function packSimple(pieces, SW, SL, kerf) {
+        let sheets = [];
+        let sortedPieces = [...pieces].sort((a, b) => b.l - b.w - (a.l - a.w));
+        
+        while(sortedPieces.length > 0) {
+            let sheetPieces = [];
+            let currentX = 0, currentY = 0;
+            let rowHeight = 0;
+            let rowPieces = [];
+            
+            for(let i = 0; i < sortedPieces.length; i++) {
+                const piece = sortedPieces[i];
+                let w = piece.w, h = piece.l;
+                let rotated = false;
+                
+                // Intentar rotar si es beneficioso
+                if(piece.allowRotate) {
+                    const fitsNormal = (currentX + w <= SW && h <= SL - currentY);
+                    const fitsRotated = (currentX + h <= SW && w <= SL - currentY);
+                    
+                    if(!fitsNormal && fitsRotated) {
+                        [w, h] = [h, w];
+                        rotated = true;
+                    }
+                }
+                
+                if(currentX + w <= SW) {
+                    sheetPieces.push({
+                        x: currentX,
+                        y: currentY,
+                        w: w, l: h,
+                        color: piece.color,
+                        name: piece.name,
+                        rotated: rotated
+                    });
+                    
+                    currentX += w + kerf;
+                    rowHeight = Math.max(rowHeight, h);
+                    rowPieces.push(i);
+                } else {
+                    // Nueva fila
+                    if(rowHeight > 0) {
+                        currentY += rowHeight + kerf;
+                        currentX = 0;
+                        rowHeight = 0;
+                        
+                        // Reintentar esta pieza en nueva fila
+                        i--;
+                    }
+                }
+            }
+            
+            // Remover piezas colocadas
+            sortedPieces = sortedPieces.filter((_, idx) => !rowPieces.includes(idx));
+            sheets.push(sheetPieces);
+        }
+        
+        return sheets;
+    }
+
+    function renderSheet(sheetPieces, sheetNum, scale, SW, SL, container) {
+        const wrap = document.createElement("div");
+        wrap.className = "sheet-wrapper";
+        
+        const usedArea = sheetPieces.reduce((sum, p) => sum + (p.w * p.l), 0);
+        const efficiency = (usedArea / (SW * SL)) * 100;
+        const pieceCount = sheetPieces.length;
+        
+        wrap.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="margin:0;">Hoja ${sheetNum}</h3>
+                <div style="display:flex; gap:10px;">
+                    <span class="stats">${pieceCount} piezas</span>
+                    <span class="stats" style="background:#dcfce7; color:#166534;">
+                        Eficiencia: ${efficiency.toFixed(1)}%
+                    </span>
+                </div>
+            </div>
+            <div style="font-size:0.9rem; color:#64748b; margin-bottom:10px;">
+                ${sheetPieces.map(p => `${p.name} (${p.w}x${p.l}${p.rotated ? '⭮' : ''})`).join(', ')}
+            </div>
+        `;
+        
+        const canvas = document.createElement("canvas");
+        canvas.width = SW * scale;
+        canvas.height = SL * scale;
+        canvas.style.border = "2px solid #334155";
+        canvas.style.background = "#f8fafc";
+        
+        const ctx = canvas.getContext("2d");
+        
+        // Dibujar piezas
+        sheetPieces.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x * scale, p.y * scale, p.w * scale, p.l * scale);
+            
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(p.x * scale, p.y * scale, p.w * scale, p.l * scale);
+            
+            // Indicador de rotación
+            if(p.rotated) {
+                ctx.fillStyle = "rgba(0,0,0,0.1)";
+                ctx.beginPath();
+                ctx.moveTo(p.x * scale, p.y * scale);
+                ctx.lineTo((p.x + p.w) * scale, p.y * scale);
+                ctx.lineTo(p.x * scale, (p.y + p.l) * scale);
+                ctx.fill();
+            }
+            
+            // Texto con medidas
+            if(p.w * scale > 25) {
+                ctx.fillStyle = "#000";
+                ctx.font = `bold ${Math.max(8, scale * 2.5)}px sans-serif`;
+                ctx.textAlign = "center";
+                ctx.fillText(
+                    `${p.w}x${p.l}`,
+                    (p.x + p.w/2) * scale,
+                    (p.y + p.l/2) * scale
+                );
+            }
+        });
+        
+        // Dibujar medidas de la hoja
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([2, 2]);
+        
+        // Líneas guía cada 10cm
+        for(let x = 10; x < SW; x += 10) {
+            ctx.beginPath();
+            ctx.moveTo(x * scale, 0);
+            ctx.lineTo(x * scale, SL * scale);
+            ctx.stroke();
+        }
+        for(let y = 10; y < SL; y += 10) {
+            ctx.beginPath();
+            ctx.moveTo(0, y * scale);
+            ctx.lineTo(SW * scale, y * scale);
+            ctx.stroke();
+        }
+        
         wrap.appendChild(canvas);
         container.appendChild(wrap);
     }
+
+    // Agregar algunas piezas de ejemplo al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+        // Ya hay una pieza por defecto en el HTML
+    });
 </script>
 </body>
 </html>
-
-
-
-
-
