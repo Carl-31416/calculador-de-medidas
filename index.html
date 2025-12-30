@@ -3,59 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CorteMaestro Ajustado</title>
+    <title>Optimizador Inteligente Pro</title>
     <style>
-        :root { --p: #2563eb; --s: #10b981; --bg: #f1f5f9; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; box-sizing: border-box; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .piece-entry { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid var(--p); }
+        :root { --p: #2563eb; --s: #10b981; --bg: #f8fafc; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; box-sizing: border-box; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .piece-entry { background: #ffffff; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-left: 6px solid var(--p); }
         .btn { border: none; border-radius: 8px; padding: 15px; color: white; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
         .btn-add { background: var(--s); }
-        .btn-calc { background: var(--p); font-size: 1.1rem; }
-        .btn-del { background: #ef4444; padding: 5px; margin-top: 5px; font-size: 0.8rem; width: auto; color: white; border: none; border-radius: 4px; }
+        .btn-calc { background: var(--p); font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-del { background: #fee2e2; color: #ef4444; padding: 8px; margin-top: 8px; font-size: 0.8rem; width: auto; border: none; border-radius: 6px; font-weight: bold; }
         
         #results { margin-top: 20px; width: 100%; }
-        .sheet-wrapper { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-sizing: border-box;
-            width: 100%; /* Asegura que no exceda el padre */
-        }
-        canvas { 
-            background: #fff7ed; 
-            border: 2px solid #334155; 
-            display: block;
-            margin: 10px auto;
-            max-width: 100%; /* Obliga al canvas a no salirse */
-            height: auto; 
-        }
-        .stats { font-weight: bold; color: var(--p); background: #dbeafe; padding: 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
+        .sheet-wrapper { background: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; box-sizing: border-box; border: 1px solid #e2e8f0; }
+        canvas { background: #fff; display: block; margin: 10px auto; max-width: 100%; height: auto; border: 1px solid #334155; }
+        .stats { font-weight: bold; color: #1e40af; background: #dbeafe; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+        .header-sheet { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2 style="margin:0; font-size:1.2rem; text-align:center;">Configuración de Corte</h2>
-        <label>Grosor disco / Kerf (cm)</label>
+        <h2 style="margin:0 0 15px 0; font-size:1.3rem; color:#1e293b; text-align:center;">Optimizador de Madera</h2>
+        <label style="font-size: 0.85rem; color: #64748b;">Grosor de corte / Kerf (cm)</label>
         <input type="number" id="kerf" value="0.3" step="0.1" inputmode="decimal">
         
-        <div id="piecesList">
+        <div id="piecesList" style="margin-top: 15px;">
             <div class="piece-entry">
-                <input type="text" placeholder="Nombre (ej. Puerta)" style="width:100%">
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <div style="flex:1"><label style="font-size:10px">Ancho</label><input type="number" class="w" value="60" inputmode="decimal"></div>
-                    <div style="flex:1"><label style="font-size:10px">Largo</label><input type="number" class="l" value="120" inputmode="decimal"></div>
-                    <div style="flex:1"><label style="font-size:10px">Cant.</label><input type="number" class="q" value="2" inputmode="numeric"></div>
+                <input type="text" placeholder="Nombre de pieza" style="margin-bottom:8px">
+                <div style="display:flex; gap:8px;">
+                    <div style="flex:1"><label style="font-size:10px; color:#64748b">Ancho (cm)</label><input type="number" class="w" value="60" inputmode="decimal"></div>
+                    <div style="flex:1"><label style="font-size:10px; color:#64748b">Largo (cm)</label><input type="number" class="l" value="80" inputmode="decimal"></div>
+                    <div style="flex:1"><label style="font-size:10px; color:#64748b">Cant.</label><input type="number" class="q" value="4" inputmode="numeric"></div>
                 </div>
-                <button class="btn-del" onclick="this.parentElement.remove()">Eliminar</button>
+                <button class="btn-del" onclick="this.parentElement.remove()">✕ Eliminar</button>
             </div>
         </div>
 
-        <button class="btn btn-add" onclick="addRow()">+ Añadir Pieza</button>
-        <button class="btn btn-calc" onclick="generate()">CALCULAR DISTRIBUCIÓN</button>
+        <button class="btn btn-add" onclick="addRow()">+ Añadir otra medida</button>
+        <button class="btn btn-calc" onclick="generate()">OPTIMIZAR CORTES</button>
     </div>
 
     <div id="results"></div>
@@ -64,7 +51,7 @@
     function addRow() {
         const div = document.createElement("div");
         div.className = "piece-entry";
-        div.innerHTML = `<input type="text" placeholder="Pieza" style="width:100%"><div style="display:flex; gap:5px; margin-top:5px;"><div style="flex:1"><input type="number" class="w" placeholder="An"></div><div style="flex:1"><input type="number" class="l" placeholder="La"></div><div style="flex:1"><input type="number" class="q" placeholder="Ca"></div></div><button class="btn-del" onclick="this.parentElement.remove()">Eliminar</button>`;
+        div.innerHTML = `<input type="text" placeholder="Nombre de pieza" style="margin-bottom:8px"><div style="display:flex; gap:8px;"><div style="flex:1"><input type="number" class="w" placeholder="Ancho"></div><div style="flex:1"><input type="number" class="l" placeholder="Largo"></div><div style="flex:1"><input type="number" class="q" placeholder="Cant."></div></div><button class="btn-del" onclick="this.parentElement.remove()">✕ Eliminar</button>`;
         document.getElementById("piecesList").appendChild(div);
     }
 
@@ -73,64 +60,105 @@
         res.innerHTML = "";
         const kerf = parseFloat(document.getElementById("kerf").value) || 0;
         const SW = 122, SL = 244;
-
-        // CALCULO DE ESCALA DINÁMICA SEGÚN PANTALLA
-        // Restamos 40px para considerar márgenes y paddings del celular
-        const availableWidth = window.innerWidth - 40; 
+        const availableWidth = window.innerWidth - 50; 
         const SCALE = availableWidth / SW;
 
-        let pieces = [];
+        let piecesToPlace = [];
         document.querySelectorAll(".piece-entry").forEach(el => {
             const w = parseFloat(el.querySelector(".w").value), l = parseFloat(el.querySelector(".l").value), q = parseInt(el.querySelector(".q").value);
             if(w && l && q) {
-                const color = `hsl(${Math.random()*360}, 70%, 65%)`;
-                for(let i=0; i<q; i++) pieces.push({w: Math.min(w,l), l: Math.max(w,l), c: color});
+                const color = `hsl(${Math.random()*360}, 65%, 70%)`;
+                for(let i=0; i<q; i++) {
+                    // Guardamos ambas orientaciones para que el algoritmo elija
+                    piecesToPlace.push({ w, l, color });
+                }
             }
         });
 
-        pieces.sort((a,b) => (b.w*b.l) - (a.w*a.l));
+        // ORDENAR POR ÁREA (Importante para que el algoritmo funcione bien)
+        piecesToPlace.sort((a,b) => (b.w * b.l) - (a.w * a.l));
 
-        while(pieces.length > 0) {
-            let sheet = { p: [], area: 0 }, spaces = [{x:0, y:0, w:SW, l:SL}];
-            for(let i=0; i<pieces.length; i++){
-                let p = pieces[i], fit = false;
-                for(let j=0; j<spaces.length; j++){
-                    let s = spaces[j];
-                    if(p.w <= s.w && p.l <= s.l) {
-                        sheet.p.push({x:s.x, y:s.y, w:p.w, l:p.l, c:p.c});
-                        sheet.area += (p.w*p.l);
-                        if(s.w-p.w > 0) spaces.push({x:s.x+p.w+kerf, y:s.y, w:s.w-p.w-kerf, l:p.l});
-                        if(s.l-p.l > 0) spaces.push({x:s.x, y:s.y+p.l+kerf, w:s.w, l:s.l-p.l-kerf});
-                        spaces.splice(j,1); pieces.splice(i,1); i--; fit=true; break;
+        let sheetNum = 1;
+        while(piecesToPlace.length > 0) {
+            let placedPieces = [];
+            // Lista de espacios libres (empezamos con la hoja completa)
+            let freeSpaces = [{ x: 0, y: 0, w: SW, l: SL }];
+
+            for (let i = 0; i < piecesToPlace.length; i++) {
+                let p = piecesToPlace[i];
+                let bestSpaceIdx = -1;
+                let rotate = false;
+                
+                // Buscar el mejor espacio (Best-Fit: el que deje menos desperdicio)
+                for (let j = 0; j < freeSpaces.length; j++) {
+                    let s = freeSpaces[j];
+                    // Probar normal
+                    if (p.w <= s.w && p.l <= s.l) {
+                        bestSpaceIdx = j; rotate = false; break;
                     }
+                    // Probar rotado
+                    if (p.l <= s.w && p.w <= s.l) {
+                        bestSpaceIdx = j; rotate = true; break;
+                    }
+                }
+
+                if (bestSpaceIdx !== -1) {
+                    let s = freeSpaces[bestSpaceIdx];
+                    let finalW = rotate ? p.l : p.w;
+                    let finalL = rotate ? p.w : p.l;
+
+                    placedPieces.push({ x: s.x, y: s.y, w: finalW, l: finalL, color: p.color });
+
+                    // Dividir el espacio restante (Algoritmo Guillotina)
+                    // Creamos dos nuevos rectángulos a partir del sobrante
+                    let splitX = { x: s.x + finalW + kerf, y: s.y, w: s.w - finalW - kerf, l: finalL };
+                    let splitY = { x: s.x, y: s.y + finalL + kerf, w: s.w, l: s.l - finalL - kerf };
+
+                    freeSpaces.splice(bestSpaceIdx, 1);
+                    if (splitX.w > 1 && splitX.l > 1) freeSpaces.push(splitX);
+                    if (splitY.w > 1 && splitY.l > 1) freeSpaces.push(splitY);
+                    
+                    // Ordenar espacios libres para priorizar huecos pequeños
+                    freeSpaces.sort((a, b) => (a.w * a.l) - (b.w * b.l));
+
+                    piecesToPlace.splice(i, 1);
+                    i--;
                 }
             }
 
-            const wrapper = document.createElement("div");
-            wrapper.className = "sheet-wrapper";
-            const canvas = document.createElement("canvas");
-            // El canvas tendrá el ancho exacto de la pantalla
-            canvas.width = SW * SCALE; 
-            canvas.height = SL * SCALE;
-            const ctx = canvas.getContext("2d");
-            
-            ctx.fillStyle = "#fff7ed"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            sheet.p.forEach(p => {
-                ctx.fillStyle = p.c; ctx.fillRect(p.x*SCALE, p.y*SCALE, p.w*SCALE, p.l*SCALE);
-                ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.strokeRect(p.x*SCALE, p.y*SCALE, p.w*SCALE, p.l*SCALE);
-                
-                // Texto adaptable al tamaño de la pieza
-                if(p.w > 15) {
-                    ctx.fillStyle = "#000"; 
-                    ctx.font = `bold ${Math.max(10, 5 * SCALE)}px Arial`;
-                    ctx.fillText(`${p.w}x${p.l}`, (p.x+2)*SCALE, (p.y+8)*SCALE);
-                }
-            });
-
-            wrapper.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><h3>Hoja ${res.children.length + 1}</h3><div class="stats">Uso: ${((sheet.area/(SW*SL))*100).toFixed(1)}%</div></div>`;
-            wrapper.appendChild(canvas);
-            res.appendChild(wrapper);
+            renderSheet(placedPieces, sheetNum++, SCALE, SW, SL, res);
         }
+    }
+
+    function renderSheet(pieces, num, scale, sw, sl, container) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "sheet-wrapper";
+        let usedArea = pieces.reduce((acc, p) => acc + (p.w * p.l), 0);
+        let eff = ((usedArea / (sw * sl)) * 100).toFixed(1);
+
+        wrapper.innerHTML = `<div class="header-sheet"><h3>Hoja ${num}</h3><span class="stats">Uso: ${eff}%</span></div>`;
+        
+        const canvas = document.createElement("canvas");
+        canvas.width = sw * scale; canvas.height = sl * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        pieces.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x * scale, p.y * scale, p.w * scale, p.l * scale);
+            ctx.strokeStyle = "#334155";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(p.x * scale, p.y * scale, p.w * scale, p.l * scale);
+            
+            if (p.w * scale > 30 && p.l * scale > 20) {
+                ctx.fillStyle = "#1e293b";
+                ctx.font = `bold ${Math.max(10, 4 * scale)}px sans-serif`;
+                ctx.fillText(`${p.w}x${p.l}`, (p.x + 2) * scale, (p.y + 6) * scale);
+            }
+        });
+
+        wrapper.appendChild(canvas);
+        container.appendChild(wrapper);
     }
 </script>
 </body>
