@@ -3,59 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CorteMaestro Fix</title>
+    <title>CorteMaestro Ajustado</title>
     <style>
         :root { --p: #2563eb; --s: #10b981; --bg: #f1f5f9; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; box-sizing: border-box; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         .piece-entry { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid var(--p); }
         .btn { border: none; border-radius: 8px; padding: 15px; color: white; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
         .btn-add { background: var(--s); }
         .btn-calc { background: var(--p); font-size: 1.1rem; }
-        .btn-del { background: #ef4444; padding: 5px; margin-top: 5px; font-size: 0.8rem; }
+        .btn-del { background: #ef4444; padding: 5px; margin-top: 5px; font-size: 0.8rem; width: auto; color: white; border: none; border-radius: 4px; }
         
-        /* CONTENEDOR DE RESULTADOS CORREGIDO */
-        #results { margin-top: 20px; }
+        #results { margin-top: 20px; width: 100%; }
         .sheet-wrapper { 
             background: white; 
             padding: 10px; 
             border-radius: 12px; 
             margin-bottom: 20px; 
-            overflow-x: auto; /* Permite deslizar si el dibujo es grande */
-            text-align: center;
+            box-sizing: border-box;
+            width: 100%; /* Asegura que no exceda el padre */
         }
         canvas { 
             background: #fff7ed; 
             border: 2px solid #334155; 
             display: block;
             margin: 10px auto;
-            image-rendering: crisp-edges; /* Mejora nitidez en móviles */
+            max-width: 100%; /* Obliga al canvas a no salirse */
+            height: auto; 
         }
-        .stats { font-weight: bold; color: var(--p); background: #dbeafe; padding: 5px; border-radius: 5px; }
+        .stats { font-weight: bold; color: var(--p); background: #dbeafe; padding: 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2 style="margin:0; font-size:1.2rem;">Configuración</h2>
-        <label>Grosor disco (cm)</label>
-        <input type="number" id="kerf" value="0.3" step="0.1">
+        <h2 style="margin:0; font-size:1.2rem; text-align:center;">Configuración de Corte</h2>
+        <label>Grosor disco / Kerf (cm)</label>
+        <input type="number" id="kerf" value="0.3" step="0.1" inputmode="decimal">
         
         <div id="piecesList">
             <div class="piece-entry">
-                <input type="text" placeholder="Nombre pieza" style="width:50%">
-                <div style="display:flex; gap:5px">
-                    <input type="number" class="w" placeholder="Ancho" value="60">
-                    <input type="number" class="l" placeholder="Largo" value="120">
-                    <input type="number" class="q" placeholder="Cant" value="2">
+                <input type="text" placeholder="Nombre (ej. Puerta)" style="width:100%">
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <div style="flex:1"><label style="font-size:10px">Ancho</label><input type="number" class="w" value="60" inputmode="decimal"></div>
+                    <div style="flex:1"><label style="font-size:10px">Largo</label><input type="number" class="l" value="120" inputmode="decimal"></div>
+                    <div style="flex:1"><label style="font-size:10px">Cant.</label><input type="number" class="q" value="2" inputmode="numeric"></div>
                 </div>
                 <button class="btn-del" onclick="this.parentElement.remove()">Eliminar</button>
             </div>
         </div>
 
         <button class="btn btn-add" onclick="addRow()">+ Añadir Pieza</button>
-        <button class="btn btn-calc" onclick="generate()">CALCULAR Y VER CORTES</button>
+        <button class="btn btn-calc" onclick="generate()">CALCULAR DISTRIBUCIÓN</button>
     </div>
 
     <div id="results"></div>
@@ -64,7 +64,7 @@
     function addRow() {
         const div = document.createElement("div");
         div.className = "piece-entry";
-        div.innerHTML = `<input type="text" placeholder="Pieza" style="width:50%"><div style="display:flex; gap:5px"><input type="number" class="w" placeholder="Ancho"><input type="number" class="l" placeholder="Largo"><input type="number" class="q" placeholder="Cant"></div><button class="btn-del" onclick="this.parentElement.remove()">Eliminar</button>`;
+        div.innerHTML = `<input type="text" placeholder="Pieza" style="width:100%"><div style="display:flex; gap:5px; margin-top:5px;"><div style="flex:1"><input type="number" class="w" placeholder="An"></div><div style="flex:1"><input type="number" class="l" placeholder="La"></div><div style="flex:1"><input type="number" class="q" placeholder="Ca"></div></div><button class="btn-del" onclick="this.parentElement.remove()">Eliminar</button>`;
         document.getElementById("piecesList").appendChild(div);
     }
 
@@ -73,12 +73,19 @@
         res.innerHTML = "";
         const kerf = parseFloat(document.getElementById("kerf").value) || 0;
         const SW = 122, SL = 244;
-        const SCALE = 4; // Escala aumentada para que se vea bien en celular
+
+        // CALCULO DE ESCALA DINÁMICA SEGÚN PANTALLA
+        // Restamos 40px para considerar márgenes y paddings del celular
+        const availableWidth = window.innerWidth - 40; 
+        const SCALE = availableWidth / SW;
 
         let pieces = [];
         document.querySelectorAll(".piece-entry").forEach(el => {
             const w = parseFloat(el.querySelector(".w").value), l = parseFloat(el.querySelector(".l").value), q = parseInt(el.querySelector(".q").value);
-            if(w && l && q) for(let i=0; i<q; i++) pieces.push({w: Math.min(w,l), l: Math.max(w,l), c: `hsl(${Math.random()*360}, 70%, 60%)`});
+            if(w && l && q) {
+                const color = `hsl(${Math.random()*360}, 70%, 65%)`;
+                for(let i=0; i<q; i++) pieces.push({w: Math.min(w,l), l: Math.max(w,l), c: color});
+            }
         });
 
         pieces.sort((a,b) => (b.w*b.l) - (a.w*a.l));
@@ -102,23 +109,25 @@
             const wrapper = document.createElement("div");
             wrapper.className = "sheet-wrapper";
             const canvas = document.createElement("canvas");
-            canvas.width = SW * SCALE; canvas.height = SL * SCALE;
+            // El canvas tendrá el ancho exacto de la pantalla
+            canvas.width = SW * SCALE; 
+            canvas.height = SL * SCALE;
             const ctx = canvas.getContext("2d");
             
             ctx.fillStyle = "#fff7ed"; ctx.fillRect(0,0,canvas.width,canvas.height);
             sheet.p.forEach(p => {
                 ctx.fillStyle = p.c; ctx.fillRect(p.x*SCALE, p.y*SCALE, p.w*SCALE, p.l*SCALE);
-                ctx.strokeStyle = "#000"; ctx.strokeRect(p.x*SCALE, p.y*SCALE, p.w*SCALE, p.l*SCALE);
+                ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.strokeRect(p.x*SCALE, p.y*SCALE, p.w*SCALE, p.l*SCALE);
                 
-                if(p.w > 10) {
-                    ctx.fillStyle = "white"; ctx.font = "bold 20px Arial";
-                    ctx.shadowColor = "black"; ctx.shadowBlur = 4;
+                // Texto adaptable al tamaño de la pieza
+                if(p.w > 15) {
+                    ctx.fillStyle = "#000"; 
+                    ctx.font = `bold ${Math.max(10, 5 * SCALE)}px Arial`;
                     ctx.fillText(`${p.w}x${p.l}`, (p.x+2)*SCALE, (p.y+8)*SCALE);
-                    ctx.shadowBlur = 0;
                 }
             });
 
-            wrapper.innerHTML = `<h3>Hoja ${res.children.length + 1}</h3><div class="stats">Aprovechamiento: ${((sheet.area/(SW*SL))*100).toFixed(1)}%</div>`;
+            wrapper.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><h3>Hoja ${res.children.length + 1}</h3><div class="stats">Uso: ${((sheet.area/(SW*SL))*100).toFixed(1)}%</div></div>`;
             wrapper.appendChild(canvas);
             res.appendChild(wrapper);
         }
